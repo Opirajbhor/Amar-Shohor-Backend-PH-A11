@@ -1,0 +1,182 @@
+[
+  {
+    "id": 1,
+    "title": "Broken Street Light",
+    "description": "The street light near Kalyanpur Market is not working since last week.",
+    "location": "Kalyanpur, Dhaka",
+    "category": "Street Light",
+    "status": "Pending",
+    "image": "https://via.placeholder.com/400x250.png?text=Street+Light"
+  },
+  {
+    "id": 2,
+    "title": "Overflowing Drain",
+    "description": "Drainage clogged after last night’s rain.",
+    "location": "Dhanmondi, Dhaka",
+    "category": "Drainage",
+    "status": "In Progress",
+    "image": "https://via.placeholder.com/400x250.png?text=Drainage"
+  },
+  {
+    "id": 3,
+    "title": "Water Leakage",
+    "description": "Water pipe leakage causing water logging on road.",
+    "location": "Mirpur, Dhaka",
+    "category": "Water",
+    "status": "Completed",
+    "image": "https://via.placeholder.com/400x250.png?text=Water"
+  },
+  {
+    "id": 4,
+    "title": "Pothole on Main Road",
+    "description": "Large pothole developing near the bus stop, dangerous for bikers.",
+    "location": "Gulshan 1, Dhaka",
+    "category": "Road Damage",
+    "status": "Pending",
+    "image": "https://via.placeholder.com/400x250.png?text=Pothole"
+  },
+  {
+    "id": 5,
+    "title": "Illegal Dumping of Trash",
+    "description": "Construction debris and household waste being dumped near the park entrance.",
+    "location": "Uttara Sector 7, Dhaka",
+    "category": "Waste Management",
+    "status": "In Progress",
+    "image": "https://via.placeholder.com/400x250.png?text=Trash"
+  },
+  {
+    "id": 6,
+    "title": "Damaged Sidewalk",
+    "description": "Cracked and uneven pavement making walking difficult for elderly residents.",
+    "location": "Bashundhara R/A, Dhaka",
+    "category": "Road Damage",
+    "status": "Pending",
+    "image": "https://via.placeholder.com/400x250.png?text=Sidewalk"
+  },
+  {
+    "id": 7,
+    "title": "Noisy Construction after Hours",
+    "description": "Loud machinery operating past 10 PM on a residential street.",
+    "location": "Mohakhali, Dhaka",
+    "category": "Noise Pollution",
+    "status": "Pending",
+    "image": "https://via.placeholder.com/400x250.png?text=Construction"
+  },
+  {
+    "id": 8,
+    "title": "Missing Manhole Cover",
+    "description": "Missing manhole cover in the middle of the road, major safety hazard.",
+    "location": "Rampura, Dhaka",
+    "category": "Safety Hazard",
+    "status": "In Progress",
+    "image": "https://via.placeholder.com/400x250.png?text=Manhole"
+  },
+  {
+    "id": 9,
+    "title": "Faded Crosswalk Markings",
+    "description": "Crosswalk lines completely faded, making it unsafe for pedestrians to cross.",
+    "location": "New Market Area, Dhaka",
+    "category": "Traffic/Signage",
+    "status": "Completed",
+    "image": "https://via.placeholder.com/400x250.png?text=Crosswalk"
+  },
+  {
+    "id": 10,
+    "title": "Broken Park Bench",
+    "description": "Bench in the local park is broken and unusable.",
+    "location": "Farmgate, Dhaka",
+    "category": "Public Amenity",
+    "status": "Pending",
+    "image": "https://via.placeholder.com/400x250.png?text=Park+Bench"
+  },
+  {
+    "id": 11,
+    "title": "Dead Tree Needs Removal",
+    "description": "A large, dead tree is leaning precariously over the power lines.",
+    "location": "Malibagh, Dhaka",
+    "category": "Vegetation",
+    "status": "In Progress",
+    "image": "https://via.placeholder.com/400x250.png?text=Dead+Tree"
+  },
+  {
+    "id": 12,
+    "title": "Traffic Light Malfunction",
+    "description": "Traffic light at the main intersection is stuck on red in one direction.",
+    "location": "Jatrabari, Dhaka",
+    "category": "Traffic/Signage",
+    "status": "Completed",
+    "image": "https://via.placeholder.com/400x250.png?text=Traffic+Light"
+  },
+  {
+    "id": 13,
+    "title": "Overflowing Public Dustbin",
+    "description": "Dustbin near the tea stall is overflowing, attracting stray animals.",
+    "location": "Shyamoli, Dhaka",
+    "category": "Waste Management",
+    "status": "Pending",
+    "image": "https://via.placeholder.com/400x250.png?text=Dustbin"
+  },
+  {
+    "id": 14,
+    "title": "Damaged Bus Stop Shelter",
+    "description": "The roof of the bus stop shelter has partially collapsed.",
+    "location": "Azimpur, Dhaka",
+    "category": "Public Amenity",
+    "status": "In Progress",
+    "image": "https://via.placeholder.com/400x250.png?text=Bus+Stop"
+  },
+  {
+    "id": 15,
+    "title": "Low Hanging Wires",
+    "description": "Utility cables are hanging dangerously low across the footpath.",
+    "location": "Banani, Dhaka",
+    "category": "Safety Hazard",
+    "status": "Completed",
+    "image": "https://via.placeholder.com/400x250.png?text=Wires"
+  },
+  {
+    "id": 16,
+    "title": "Water Meter Leakage",
+    "description": "Constant dripping from the main water meter on the pavement.",
+    "location": "Tongi, Gazipur (Greater Dhaka)",
+    "category": "Water",
+    "status": "Pending",
+    "image": "https://via.placeholder.com/400x250.png?text=Water+Meter"
+  },
+  {
+    "id": 17,
+    "title": "Graffiti on Public Wall",
+    "description": "Large amounts of inappropriate graffiti sprayed on the boundary wall of the school.",
+    "location": "Badda, Dhaka",
+    "category": "Vandalism",
+    "status": "In Progress",
+    "image": "https://via.placeholder.com/400x250.png?text=Graffiti"
+  },
+  {
+    "id": 18,
+    "title": "Blocked Storm Drain Inlet",
+    "description": "Leaves and debris completely blocking the storm drain inlet, risking local flooding.",
+    "location": "Khilgaon, Dhaka",
+    "category": "Drainage",
+    "status": "Completed",
+    "image": "https://via.placeholder.com/400x250.png?text=Storm+Drain"
+  },
+  {
+    "id": 19,
+    "title": "Missing Street Sign",
+    "description": "The street name sign for Road 5 is missing, confusing visitors.",
+    "location": "Lalmatia, Dhaka",
+    "category": "Traffic/Signage",
+    "status": "Pending",
+    "image": "https://via.placeholder.com/400x250.png?text=Street+Sign"
+  },
+  {
+    "id": 20,
+    "title": "Excessive Loitering/Security Issue",
+    "description": "Group of individuals causing disturbances late at night near the residential area gate.",
+    "location": "Mohammadpur, Dhaka",
+    "category": "Safety Hazard",
+    "status": "In Progress",
+    "image": "https://via.placeholder.com/400x250.png?text=Security+Issue"
+  }
+]
