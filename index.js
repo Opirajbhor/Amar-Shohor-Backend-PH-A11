@@ -23,6 +23,7 @@ async function connectDB() {
     await client.connect();
    const db = client.db('AmarShohor')
    const all_Issues = db.collection("All_issues")
+   const users = db.collection("users")
 
 // GET data starts---------------------------
 // all issues get
@@ -45,6 +46,18 @@ app.post('/all-issues', async (req, res)=>{
   try{
     const data = await req.body
     const result = await all_Issues.insertOne(data)
+    res.send(result)
+  }
+  catch(err){
+    res.send("data send failled to db", result)
+  }
+})
+// -----------------
+// post user info
+app.post('/user', async (req, res)=>{
+  try{
+    const data = await req.body
+    const result = await users.insertOne(data)
     res.send(result)
   }
   catch(err){
