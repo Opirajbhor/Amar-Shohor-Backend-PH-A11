@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { client } from "./mongoClient.js";
+import { initializeApp } from "firebase-admin/app";
 
 dotenv.config();
 const port = process.env.PORT || 3000;
@@ -52,6 +53,32 @@ async function connectDB() {
         res.status(500).json({ mesage: "data load failled" });
       }
     });
+
+    // get user issue Data-------------
+    app.get("/user-issues", async (req, res) => {
+      try {
+        console.log("Query received:", req.query);
+
+        const { email } = req.query;
+
+        if (!email) {
+          return res.status(400).send({ message: "Email is required" });
+        }
+
+        // Debug here:
+        console.log("Looking for issues of email:", email);
+
+        const issues = await all_Issues.find({ email }).toArray();
+
+        console.log("DB result:", issues);
+
+        res.send(issues);
+      } catch (err) {
+        console.error("SERVER ERROR:", err);
+        res.status(500).send({ message: "Server Error", error: err.message });
+      }
+    });
+
     // Get data ends--------------------------------------
 
     // Post Data starts-------------------------------------
@@ -59,8 +86,8 @@ async function connectDB() {
     app.post("/all-issues", async (req, res) => {
       const { title, description, email, location, category, image } = req.body;
 
-      const userLimit = all_Issues.find(email);
-      if (userLimit.length > 3) {
+      const userLimit = all_Issues.countDocuments({ reportedBy: email });
+      if (userLimit.length >= 3) {
         return res.status(403).json({
           message:
             "Free user limit reached. Please subscribe to Premium to post more issues.",
@@ -73,7 +100,7 @@ async function connectDB() {
           location,
           category,
           image,
-          reportedBy: req.user.email.toLowerCase(),
+          reportedBy: email,
           status: "Pending",
           createdAt: new Date(),
           upvoteCount: 0,
@@ -113,7 +140,31 @@ async function connectDB() {
         res.send("data send failled to db", result);
       }
     });
-
+    
+    // google user info
+    app.post("/google-users", async (req, res) => {
+      try {
+        const { name, imageURL, email } =  req.body;
+        const isUserAvailable = await users.countDocuments({ email: email });
+        if (isUserAvailable) {
+          return res.send("user data already available in db");
+        } else {
+          const data = {
+            name,
+            email,
+            role: "Citizen",
+            photoURL: imageURL,
+            isPremium: false,
+            isBlocked: false,
+            createdAt: new Date(),
+          };
+          const result = await users.insertOne(data);
+          res.send("user added to db");
+        }
+      } catch (err) {
+        res.send("data send failled to db", result);
+      }
+    });
     // Post Data ends---------------------------------------
   } catch (error) {
     console.error("MongoDB connection error:", error);
