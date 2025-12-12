@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import sampleData from "./data/sample.json" with { type: "json" };
 import { client } from "./mongoClient.js";
 
 dotenv.config();
@@ -17,59 +16,105 @@ app.use(
 );
 app.use(express.json());
 
+// JWT verication
+// jwt middlewares
+// const verifyJWT = async (req, res, next) => {
+//   const token = req?.headers?.authorization?.split(' ')[1]
+//   console.log(token)
+//   if (!token) return res.status(401).send({ message: 'Unauthorized Access!' })
+//   try {
+//     const decoded = await admin.auth().verifyIdToken(token)
+//     req.tokenEmail = decoded.email
+//     console.log(decoded)
+//     next()
+//   } catch (err) {
+//     console.log(err)
+//     return res.status(401).send({ message: 'Unauthorized Access!', err })
+//   }
+// }
+
 // MongoDB connection
 async function connectDB() {
   try {
     await client.connect();
-   const db = client.db('AmarShohor')
-   const all_Issues = db.collection("All_issues")
-   const users = db.collection("users")
+    const db = client.db("AmarShohor");
+    const all_Issues = db.collection("All_issues");
+    const timeline = db.collection("timeline");
+    const users = db.collection("users");
 
-// GET data starts---------------------------
-// all issues get
-app.get("/all-issues", async (req, res) => {
-  try{
-    const result = await all_Issues.find().toArray()
-      res.status(200).json(result)
-    
-  }
-  catch(err){
-    res.status(500).json({error:"data load failled"})
+    // GET data starts---------------------------
+    // all issues get
+    app.get("/all-issues", async (req, res) => {
+      try {
+        const result = await all_Issues.find().toArray();
+        res.status(200).json(result);
+      } catch (err) {
+        res.status(500).json({ mesage: "data load failled" });
+      }
+    });
+    // Get data ends--------------------------------------
 
-  }
-});
-// Get data ends--------------------------------------
+    // Post Data starts-------------------------------------
+    // post an issue
+    app.post("/all-issues", async (req, res) => {
+      const { title, description, email, location, category, image } = req.body;
 
-// Post Data starts-------------------------------------
-// post an issue
-app.post('/all-issues', async (req, res)=>{
-  try{
-    const data = await req.body
-    const result = await all_Issues.insertOne(data)
-    res.send(result)
-  }
-  catch(err){
-    res.send("data send failled to db", result)
-  }
-})
-// -----------------
-// post user info
-app.post('/user', async (req, res)=>{
-  try{
-    const data = await req.body
-    const result = await users.insertOne(data)
-    res.send(result)
-  }
-  catch(err){
-    res.send("data send failled to db", result)
-  }
-})
+      const userLimit = all_Issues.find(email);
+      if (userLimit.length > 3) {
+        return res.status(403).json({
+          message:
+            "Free user limit reached. Please subscribe to Premium to post more issues.",
+        });
+      }
+      try {
+        const newIssue = {
+          title,
+          description,
+          location,
+          category,
+          image,
+          reportedBy: req.user.email.toLowerCase(),
+          status: "Pending",
+          createdAt: new Date(),
+          upvoteCount: 0,
+          assignedTo: "Not Assigned Yet",
+        };
+        const result = await all_Issues.insertOne(newIssue);
 
-// Post Data ends---------------------------------------
+        // Timeline entry---------------
+        // insertedid
+        const insertedID = result.insertedId;
 
+        const timelineData = {
+          issueId: insertedID,
+          status: "Pending",
+          message: "Issue successfully reported by Citizen.",
+          updatedByRole: "Citizen",
+          updatedByEmail: email,
+          dateAndTime: new Date(),
+        };
+        await timeline.insertOne(timelineData);
 
+        res.status(201).json(result);
+      } catch (err) {
+        res
+          .status(500)
+          .json({ message: "failled to report issue", error: err.message });
+      }
+    });
+    // -----------------
+    // post user info
+    app.post("/user", async (req, res) => {
+      try {
+        const data = await req.body;
+        const result = await users.insertOne(data);
+        res.send(result);
+      } catch (err) {
+        res.send("data send failled to db", result);
+      }
+    });
 
-
+    // Post Data ends---------------------------------------
   } catch (error) {
     console.error("MongoDB connection error:", error);
     process.exit(1); // stop server if DB connection fails
@@ -80,10 +125,6 @@ app.post('/user', async (req, res)=>{
 app.get("/", (req, res) => {
   res.send("Backend is Running!");
 });
-
-
-
-
 
 // Start server only after DB connects
 connectDB().then(() => {
