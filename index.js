@@ -3,6 +3,13 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { client } from "./mongoClient.js";
 import { initializeApp } from "firebase-admin/app";
+import admin from "firebase-admin";
+import serviceAccount from "./AmarShohor-firebaseAdminSDK.json" with { type: 'json' };
+
+// firebase admin sdk
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 dotenv.config();
 const port = process.env.PORT || 3000;
@@ -19,20 +26,21 @@ app.use(express.json());
 
 // JWT verication
 // jwt middlewares
-// const verifyJWT = async (req, res, next) => {
-//   const token = req?.headers?.authorization?.split(' ')[1]
-//   console.log(token)
-//   if (!token) return res.status(401).send({ message: 'Unauthorized Access!' })
-//   try {
-//     const decoded = await admin.auth().verifyIdToken(token)
-//     req.tokenEmail = decoded.email
-//     console.log(decoded)
-//     next()
-//   } catch (err) {
-//     console.log(err)
-//     return res.status(401).send({ message: 'Unauthorized Access!', err })
-//   }
-// }
+const verifyJWT = async (req, res, next) => {
+  const token = req?.headers?.authorization?.split(" ")[1];
+  console.log(token);
+  if (!token) return res.status(401).send({ message: "Unauthorized Access!" });
+  try {
+    const decoded = await admin.auth().verifyIdToken(token);
+    req.tokenEmail = decoded.email;
+    console.log(decoded);
+    console.log("token email--->", req.tokenEmail);
+    next();
+  } catch (err) {
+    console.log(err);
+    return res.status(401).send({ message: "Unauthorized Access!", err });
+  }
+};
 
 // MongoDB connection
 async function connectDB() {
@@ -56,23 +64,17 @@ async function connectDB() {
 
     // get user issue Data-------------
     app.get("/user-issues", async (req, res) => {
-      try {
-        console.log("Query received:", req.query);
-
-        const { email } = req.query;
-
-        if (!email) {
-          return res.status(400).send({ message: "Email is required" });
-        }
-
-        // Debug here:
-        console.log("Looking for issues of email:", email);
-
-        const issues = await all_Issues.find({ email }).toArray();
-
+      const userEmail = req.headers.email
+      if (!userEmail) {
+        return res.status(400).json({ message: "user is missing." });
+          }
+          try {
+        const query = {reportedBy:userEmail}
+              // Debug here:
+        console.log("Looking for issues of email:", userEmail);
+        const issues = await all_Issues.find(query).toArray();
         console.log("DB result:", issues);
-
-        res.send(issues);
+        res.status(200).json(issues);
       } catch (err) {
         console.error("SERVER ERROR:", err);
         res.status(500).send({ message: "Server Error", error: err.message });
@@ -130,21 +132,35 @@ async function connectDB() {
       }
     });
     // -----------------
-    // post user info
+    // post user info from registration form method
     app.post("/user", async (req, res) => {
       try {
-        const data = await req.body;
-        const result = await users.insertOne(data);
-        res.send(result);
+        const { name, imageURL, email } = req.body;
+        const isUserAvailable = await users.countDocuments({ email: email });
+        if (isUserAvailable) {
+          return res.send("user data already available in db");
+        } else {
+          const data = {
+            name,
+            email,
+            role: "Citizen",
+            photoURL: imageURL,
+            isPremium: false,
+            isBlocked: false,
+            createdAt: new Date(),
+          };
+          const result = await users.insertOne(data);
+          res.send("user added to db");
+        }
       } catch (err) {
         res.send("data send failled to db", result);
       }
     });
-    
+
     // google user info
     app.post("/google-users", async (req, res) => {
       try {
-        const { name, imageURL, email } =  req.body;
+        const { name, imageURL, email } = req.body;
         const isUserAvailable = await users.countDocuments({ email: email });
         if (isUserAvailable) {
           return res.send("user data already available in db");
