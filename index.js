@@ -63,7 +63,7 @@ async function connectDB() {
     });
 
     // get user issue Data-------------
-    app.get("/user-issues", async (req, res) => {
+    app.get("/user-issues",verifyJWT, async (req, res) => {
       const userEmail = req.headers.email
       if (!userEmail) {
         return res.status(400).json({ message: "user is missing." });
@@ -182,6 +182,42 @@ async function connectDB() {
       }
     });
     // Post Data ends---------------------------------------
+    // patch Data Starts-------------------------
+
+    app.patch("/all-issues/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    const result = await all_Issues.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updates }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).send({ message: "Issue not found" });
+    }
+
+    res.send({ success: true });
+  } catch (error) {
+    res.status(400).send({ message: "Update failed" });
+  }
+});
+
+
+    // patch Data ends-------------------------
+
+    // Delete Data Starts------------------
+  app.delete('/all-issues/:id', async (req, res)=>{
+    const issueId = req.params.id
+   await all_Issues.deleteOne({_id : issueId})
+    res.status(200).send({message: "Issue deleted"})
+  })
+
+    // Delete Data ends------------------
+
+
+
   } catch (error) {
     console.error("MongoDB connection error:", error);
     process.exit(1); // stop server if DB connection fails
