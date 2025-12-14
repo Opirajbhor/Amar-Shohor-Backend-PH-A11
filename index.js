@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { client } from "./mongoClient.js";
 import { initializeApp } from "firebase-admin/app";
+import { ObjectId } from "mongodb";
 import admin from "firebase-admin";
 import serviceAccount from "./AmarShohor-firebaseAdminSDK.json" with { type: 'json' };
 
@@ -63,7 +64,7 @@ async function connectDB() {
     });
 
     // get user issue Data-------------
-    app.get("/user-issues",verifyJWT, async (req, res) => {
+    app.get("/user-issues", async (req, res) => {
       const userEmail = req.headers.email
       if (!userEmail) {
         return res.status(400).json({ message: "user is missing." });
@@ -71,9 +72,7 @@ async function connectDB() {
           try {
         const query = {reportedBy:userEmail}
               // Debug here:
-        console.log("Looking for issues of email:", userEmail);
         const issues = await all_Issues.find(query).toArray();
-        console.log("DB result:", issues);
         res.status(200).json(issues);
       } catch (err) {
         console.error("SERVER ERROR:", err);
@@ -210,7 +209,12 @@ async function connectDB() {
     // Delete Data Starts------------------
   app.delete('/all-issues/:id', async (req, res)=>{
     const issueId = req.params.id
-   await all_Issues.deleteOne({_id : issueId})
+    console.log(issueId)
+    const doc = await all_Issues.findOne();
+console.log("sample doc:", doc);
+    const query = {_id: new ObjectId(issueId)}
+    const result =   await all_Issues.deleteOne(query)
+    console.log("deleted result",result)
     res.status(200).send({message: "Issue deleted"})
   })
 
