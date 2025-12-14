@@ -187,6 +187,7 @@ async function connectDB() {
   try {
     const { id } = req.params;
     const updates = req.body;
+    console.log("upates", updates)
 
     const result = await all_Issues.updateOne(
       { _id: new ObjectId(id) },
