@@ -23,5 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 
+echo ".env" >> .gitignore
+git rm --cached .env
+
+
 # firebase admin sdk
 AmarShohor-firebaseAdminSDK.json

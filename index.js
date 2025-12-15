@@ -195,7 +195,7 @@ async function connectDB() {
         res.send("data send failled to db", result);
       }
     });
-// payment api------------
+// payment api for boost issue------------
 app.post('/create-checkout-session', async (req, res) => {
     const paymentInfo =  req.body
     const session = await stripe.checkout.sessions.create({
@@ -228,8 +228,8 @@ app.post('/create-checkout-session', async (req, res) => {
 })
 
     // Post Data ends---------------------------------------
+    
     // patch Data Starts-------------------------
-
     app.patch("/all-issues/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -270,7 +270,6 @@ if(session?.payment_status === 'paid'){
 }
   res.send({success: true})
 })
-
     // patch Data ends-------------------------
 
     // Delete Data Starts------------------
@@ -286,8 +285,6 @@ console.log("sample doc:", doc);
   })
 
     // Delete Data ends------------------
-
-
 
   } catch (error) {
     console.error("MongoDB connection error:", error);
