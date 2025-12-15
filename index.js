@@ -120,6 +120,7 @@ async function connectDB() {
           createdAt: new Date(),
           upvoteCount: 0,
           assignedTo: "Not Assigned Yet",
+          isBoosted:false,
         };
         const result = await all_Issues.insertOne(newIssue);
 
@@ -170,7 +171,7 @@ async function connectDB() {
       }
     });
 
-    // google user info
+    // google user info-----------
     app.post("/google-users", async (req, res) => {
       try {
         const { name, imageURL, email } = req.body;
@@ -194,7 +195,7 @@ async function connectDB() {
         res.send("data send failled to db", result);
       }
     });
-// payment api
+// payment api------------
 app.post('/create-checkout-session', async (req, res) => {
     const paymentInfo =  req.body
     const session = await stripe.checkout.sessions.create({
@@ -214,19 +215,17 @@ app.post('/create-checkout-session', async (req, res) => {
     ],
     customer_email: paymentInfo.email,
     mode: 'payment',
-    meta_data: {
-      issueId:paymentInfo._id,
-
+    metadata: {
+      issueId:paymentInfo.issueId,
+      test: "for test",
     },
-    success_url: `${process.env.CLIENT_URL}/dashboard/payment-success`,
+
+    success_url: `${process.env.CLIENT_URL}/dashboard/payment-success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.CLIENT_URL}/dashboard/payment-cancel`,
     })
-    console.log(session)
     res.json({url: session.url})
     
 })
-
-
 
     // Post Data ends---------------------------------------
     // patch Data Starts-------------------------
@@ -252,6 +251,25 @@ app.post('/create-checkout-session', async (req, res) => {
   }
 });
 
+// payment data update
+app.patch('/payment-success', async (req,res)=>{
+  const sessionId = req.query.session_id
+const session = await stripe.checkout.sessions.retrieve(sessionId)
+if(session?.payment_status === 'paid'){
+  const paidIssueId = session?.metadata.issueId
+  const query = {_id: new ObjectId(paidIssueId)}
+  const update = {
+    $set : {
+      isBoosted : true,
+    },
+  }
+  const result = await all_Issues.updateOne(query, update)
+  res.send(result)
+  console.log(paidIssueId)
+
+}
+  res.send({success: true})
+})
 
     // patch Data ends-------------------------
 
