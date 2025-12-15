@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import { client } from "./mongoClient.js";
 import { initializeApp } from "firebase-admin/app";
 import { ObjectId } from "mongodb";
+import Stripe from 'stripe';
+
 import admin from "firebase-admin";
 import serviceAccount from "./AmarShohor-firebaseAdminSDK.json" with { type: 'json' };
 
@@ -15,6 +17,10 @@ admin.initializeApp({
 dotenv.config();
 const port = process.env.PORT || 3000;
 const app = express();
+
+const stripe = new Stripe(process.env.STRIPE_KEY);
+
+console.log("CLIENT_URL:", process.env.CLIENT_URL);
 
 // Middleware
 app.use(
@@ -79,6 +85,14 @@ async function connectDB() {
         res.status(500).send({ message: "Server Error", error: err.message });
       }
     });
+
+    // get single issue data
+    app.get('/all-issues/:id', async(req, res)=>{
+    const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await all_Issues.findOne(query)
+      res.send(result)
+    })
 
     // Get data ends--------------------------------------
 
@@ -180,6 +194,40 @@ async function connectDB() {
         res.send("data send failled to db", result);
       }
     });
+// payment api
+app.post('/create-checkout-session', async (req, res) => {
+    const paymentInfo =  req.body
+    const session = await stripe.checkout.sessions.create({
+         line_items: [
+      {
+        // Provide the exact Price ID (for example, price_1234) of the product you want to sell
+        price_data: {
+          currency : 'BDT',
+          unit_amount: 100000,
+          product_data: {
+            name: paymentInfo.title,
+          },
+
+        },
+        quantity: 1,
+      },
+    ],
+    customer_email: paymentInfo.email,
+    mode: 'payment',
+    meta_data: {
+      issueId:paymentInfo._id,
+
+    },
+    success_url: `${process.env.CLIENT_URL}/dashboard/payment-success`,
+    cancel_url: `${process.env.CLIENT_URL}/dashboard/payment-cancel`,
+    })
+    console.log(session)
+    res.json({url: session.url})
+    
+})
+
+
+
     // Post Data ends---------------------------------------
     // patch Data Starts-------------------------
 
