@@ -5,7 +5,6 @@ import { client } from "./mongoClient.js";
 import { initializeApp } from "firebase-admin/app";
 import { ObjectId } from "mongodb";
 import Stripe from 'stripe';
-
 import admin from "firebase-admin";
 import serviceAccount from "./AmarShohor-firebaseAdminSDK.json" with { type: 'json' };
 
@@ -17,10 +16,7 @@ admin.initializeApp({
 dotenv.config();
 const port = process.env.PORT || 3000;
 const app = express();
-
 const stripe = new Stripe(process.env.STRIPE_KEY);
-
-console.log("CLIENT_URL:", process.env.CLIENT_URL);
 
 // Middleware
 app.use(
@@ -35,16 +31,13 @@ app.use(express.json());
 // jwt middlewares
 const verifyJWT = async (req, res, next) => {
   const token = req?.headers?.authorization?.split(" ")[1];
-  console.log(token);
   if (!token) return res.status(401).send({ message: "Unauthorized Access!" });
   try {
     const decoded = await admin.auth().verifyIdToken(token);
     req.tokenEmail = decoded.email;
-    console.log(decoded);
     console.log("token email--->", req.tokenEmail);
     next();
   } catch (err) {
-    console.log(err);
     return res.status(401).send({ message: "Unauthorized Access!", err });
   }
 };
@@ -57,6 +50,7 @@ async function connectDB() {
     const all_Issues = db.collection("All_issues");
     const timeline = db.collection("timeline");
     const users = db.collection("users");
+    const paymentCollection = db.collection("payments")
 
     // GET data starts---------------------------
     // all issues get
@@ -94,6 +88,22 @@ async function connectDB() {
       res.send(result)
     })
 
+
+    // get user payments
+    app.get('/user-payments', async(req,res)=>{
+      const userEmail = req.headers.email
+        if (!userEmail) {
+        return res.status(400).json({ message: "user is missing." });
+          }
+          try {
+        const query = {email:userEmail}
+        const issues = await paymentCollection.find(query).toArray();
+        res.status(200).json(issues);
+      } catch (err) {
+        console.error("SERVER ERROR:", err);
+        res.status(500).send({ message: "Server Error", error: err.message });
+      }
+    })
     // Get data ends--------------------------------------
 
     // Post Data starts-------------------------------------
@@ -198,17 +208,16 @@ async function connectDB() {
 // payment api for boost issue------------
 app.post('/create-checkout-session', async (req, res) => {
     const paymentInfo =  req.body
+    console.log("payment Info---->>", paymentInfo)
     const session = await stripe.checkout.sessions.create({
          line_items: [
       {
-        // Provide the exact Price ID (for example, price_1234) of the product you want to sell
         price_data: {
           currency : 'BDT',
           unit_amount: 100000,
           product_data: {
             name: paymentInfo.title,
           },
-
         },
         quantity: 1,
       },
@@ -217,16 +226,13 @@ app.post('/create-checkout-session', async (req, res) => {
     mode: 'payment',
     metadata: {
       issueId:paymentInfo.issueId,
-      test: "for test",
+      issueTitle: paymentInfo.title,
     },
-
     success_url: `${process.env.CLIENT_URL}/dashboard/payment-success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.CLIENT_URL}/dashboard/payment-cancel`,
     })
     res.json({url: session.url})
-    
-})
-
+    })
     // Post Data ends---------------------------------------
     
     // patch Data Starts-------------------------
@@ -234,7 +240,6 @@ app.post('/create-checkout-session', async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
-    console.log("upates", updates)
 
     const result = await all_Issues.updateOne(
       { _id: new ObjectId(id) },
@@ -254,7 +259,16 @@ app.post('/create-checkout-session', async (req, res) => {
 // payment data update
 app.patch('/payment-success', async (req,res)=>{
   const sessionId = req.query.session_id
-const session = await stripe.checkout.sessions.retrieve(sessionId)
+  const session = await stripe.checkout.sessions.retrieve(sessionId)
+ const transactionId = session.payment_intent
+ const query = {transactionId : transactionId}
+ const isPaymentExist = await paymentCollection.findOne(query)
+  if(isPaymentExist){
+    return res.send({message: "already exist", transactionId: transactionId})
+  }
+
+  console.log("session log----->", session)
+
 if(session?.payment_status === 'paid'){
   const paidIssueId = session?.metadata.issueId
   const query = {_id: new ObjectId(paidIssueId)}
@@ -264,23 +278,41 @@ if(session?.payment_status === 'paid'){
     },
   }
   const result = await all_Issues.updateOne(query, update)
-  res.send(result)
-  console.log(paidIssueId)
+  console.log("update result log----->", result)
+
+  const payment ={
+    amount : 1000,
+    currency : session.currency,
+    email : session.customer_email,
+    title : session.metadata.issueTitle,
+    id : session.metadata.issueId,
+    transactionId : session.payment_intent,
+    paymentStatus : session.payment_status,
+    paidAt : new Date (),
+  }
+  console.log("payment log----->", payment)
+
+
+  if(session?.payment_status === 'paid'){
+    const resultPayment = await paymentCollection.insertOne(payment)
+    res.send({
+      success:true, 
+      modifyIssue : result, 
+      paymentInfo: resultPayment,
+      transactionId : session.payment_intent})
+  }
 
 }
-  res.send({success: true})
+  res.send({success: false})
 })
     // patch Data ends-------------------------
 
     // Delete Data Starts------------------
   app.delete('/all-issues/:id', async (req, res)=>{
     const issueId = req.params.id
-    console.log(issueId)
     const doc = await all_Issues.findOne();
-console.log("sample doc:", doc);
     const query = {_id: new ObjectId(issueId)}
     const result =   await all_Issues.deleteOne(query)
-    console.log("deleted result",result)
     res.status(200).send({message: "Issue deleted"})
   })
 
