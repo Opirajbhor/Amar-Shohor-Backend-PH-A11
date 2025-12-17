@@ -104,6 +104,45 @@ async function connectDB() {
         res.status(500).send({ message: "Server Error", error: err.message });
       }
     })
+
+
+    // Admin----------------
+    // manage issues------------
+       app.get("/manage-issues", async (req, res) => {
+      try {
+        const result = await all_Issues.find().toArray();
+        res.status(200).json(result);
+      } catch (err) {
+        res.status(500).json({ mesage: "data load failled" });
+      }
+    });
+    // manage users----------------
+       app.get("/manage-users", async (req, res) => {
+      try {
+        const result = await users.find({role:"Citizen"}).toArray();
+        res.status(200).json(result);
+      } catch (err) {
+        res.status(500).json({ mesage: "data load failled" });
+      }
+    });
+    // manage staff----------------
+       app.get("/manage-staff", async (req, res) => {
+      try {
+        const result = await users.find({role:"Staff"}).toArray();
+        res.status(200).json(result);
+      } catch (err) {
+        res.status(500).json({ mesage: "data load failled" });
+      }
+    });
+    // manage payments----------------
+       app.get("/manage-payments", async (req, res) => {
+      try {
+        const result = await paymentCollection.find().toArray();
+        res.status(200).json(result);
+      } catch (err) {
+        res.status(500).json({ mesage: "data load failled" });
+      }
+    });
     // Get data ends--------------------------------------
 
     // Post Data starts-------------------------------------
@@ -244,6 +283,26 @@ app.post('/create-checkout-session', async (req, res) => {
     const result = await all_Issues.updateOne(
       { _id: new ObjectId(id) },
       { $set: updates }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).send({ message: "Issue not found" });
+    }
+
+    res.send({ success: true });
+  } catch (error) {
+    res.status(400).send({ message: "Update failed" });
+  }
+});
+    // patch Data Starts-------------------------
+    app.patch("/manage-users/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const blockState = req.body;
+
+    const result = await users.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: blockState }
     );
 
     if (result.matchedCount === 0) {
