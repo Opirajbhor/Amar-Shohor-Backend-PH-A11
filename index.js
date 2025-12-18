@@ -152,6 +152,22 @@ async function connectDB() {
         res.status(500).json({ mesage: "data load failled" });
       }
     });
+
+    // staff issues----------------
+    app.get("/assign-issues", async (req, res)=>{
+          const {name} = req.query
+           if (!name) {
+             return res.status(400).json({ message: "user is missing." });
+            }
+            try{
+              const result = await all_Issues.find({assignedTo : "Opi Rajbhor"}).toArray()
+              res.status(200).json(result);
+              console.log(result)
+            }
+       catch (err) {
+        res.status(500).json({ mesage: "data load failled" });
+      
+  }})
     // Get data ends--------------------------------------
 
     // ***********Post Data starts-------------------------------------
