@@ -134,6 +134,15 @@ async function connectDB() {
         res.status(500).json({ mesage: "data load failled" });
       }
     });
+    // staff list----------------
+       app.get("/staff-list", async (req, res) => {
+      try {
+        const result = await users.find({role: 'Staff'}).toArray();
+        res.status(200).json(result);
+      } catch (err) {
+        res.status(500).json({ mesage: "data load failled" });
+      }
+    });
     // manage payments----------------
        app.get("/manage-payments", async (req, res) => {
       try {
@@ -145,7 +154,8 @@ async function connectDB() {
     });
     // Get data ends--------------------------------------
 
-    // Post Data starts-------------------------------------
+    // ***********Post Data starts-------------------------------------
+
     // post an issue
     app.post("/all-issues", async (req, res) => {
       const { title, description, email, location, category, image } = req.body;
@@ -194,7 +204,7 @@ async function connectDB() {
           .json({ message: "failled to report issue", error: err.message });
       }
     });
-    // -----------------
+    // user create-----------------
     // post user info from registration form method
     app.post("/user", async (req, res) => {
       try {
@@ -214,6 +224,30 @@ async function connectDB() {
           };
           const result = await users.insertOne(data);
           res.send("user added to db");
+        }
+      } catch (err) {
+        res.send("data send failled to db", result);
+      }
+    });
+    // staff create-----------------
+    // post user info from registration form method
+    app.post("/staff", async (req, res) => {
+      try {
+        const { name, imageURL, email,phone } = req.body;
+        const isUserAvailable = await users.countDocuments({ email: email });
+        if (isUserAvailable) {
+          return res.send("staff data already available in db");
+        } else {
+          const data = {
+            name,
+            email,
+            phone,
+            role: "Staff",
+            photoURL: imageURL,
+            createdAt: new Date(),
+          };
+          const result = await users.insertOne(data);
+          res.send("staff added to db");
         }
       } catch (err) {
         res.send("data send failled to db", result);
@@ -373,6 +407,13 @@ if(session?.payment_status === 'paid'){
     const query = {_id: new ObjectId(issueId)}
     const result =   await all_Issues.deleteOne(query)
     res.status(200).send({message: "Issue deleted"})
+  })
+  app.delete('/staff-delete/:id', async (req, res)=>{
+    const staffId = req.params.id
+    const query = await users.findOne({_id :new ObjectId(staffId) });
+    const result =   await users.deleteOne(query)
+    res.status(200).send({message: "Staff deleted"})
+    console.log(doc)
   })
 
     // Delete Data ends------------------
