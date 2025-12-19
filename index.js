@@ -35,7 +35,6 @@ const verifyJWT = async (req, res, next) => {
   try {
     const decoded = await admin.auth().verifyIdToken(token);
     req.tokenEmail = decoded.email;
-    console.log("token email--->", req.tokenEmail);
     next();
   } catch (err) {
     return res.status(401).send({ message: "Unauthorized Access!", err });
@@ -53,6 +52,14 @@ async function connectDB() {
     const paymentCollection = db.collection("payments")
 
     // GET data starts---------------------------
+      // user role---------
+      app.get('/user/:email/role', async (req, res)=>{
+       const email = req.params.email
+       const query = {email}
+       const result = await users.findOne(query)
+       res.send(result?.role || 'Citizen')
+      })
+
     // all issues get
     app.get("/all-issues", async (req, res) => {
       try {
@@ -75,7 +82,6 @@ async function connectDB() {
         const issues = await all_Issues.find(query).toArray();
         res.status(200).json(issues);
       } catch (err) {
-        console.error("SERVER ERROR:", err);
         res.status(500).send({ message: "Server Error", error: err.message });
       }
     });
@@ -100,7 +106,6 @@ async function connectDB() {
         const issues = await paymentCollection.find(query).toArray();
         res.status(200).json(issues);
       } catch (err) {
-        console.error("SERVER ERROR:", err);
         res.status(500).send({ message: "Server Error", error: err.message });
       }
     })
@@ -162,7 +167,6 @@ async function connectDB() {
             try{
               const result = await all_Issues.find({assignedTo : "Opi Rajbhor"}).toArray()
               res.status(200).json(result);
-              console.log(result)
             }
        catch (err) {
         res.status(500).json({ mesage: "data load failled" });
@@ -297,7 +301,6 @@ async function connectDB() {
 // payment api for boost issue------------
 app.post('/create-checkout-session', async (req, res) => {
     const paymentInfo =  req.body
-    console.log("payment Info---->>", paymentInfo)
     const session = await stripe.checkout.sessions.create({
          line_items: [
       {
@@ -365,6 +368,25 @@ app.post('/create-checkout-session', async (req, res) => {
   }
 });
 
+// update profile--------
+app.patch('/profile-update',verifyJWT, async(req, res)=>{
+  const { name, photoURL } = req.body;
+  const email = req.tokenEmail
+  const update = {
+    $set:{name, photoURL}
+  }
+  const result = await users.updateOne({email}, update)
+  if (result.matchedCount === 0) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    res.send({
+      success: true,
+      message: "Profile updated successfully",
+    });
+})
+
+
 // payment data update
 app.patch('/payment-success', async (req,res)=>{
   const sessionId = req.query.session_id
@@ -376,7 +398,6 @@ app.patch('/payment-success', async (req,res)=>{
     return res.send({message: "already exist", transactionId: transactionId})
   }
 
-  console.log("session log----->", session)
 
 if(session?.payment_status === 'paid'){
   const paidIssueId = session?.metadata.issueId
@@ -387,7 +408,6 @@ if(session?.payment_status === 'paid'){
     },
   }
   const result = await all_Issues.updateOne(query, update)
-  console.log("update result log----->", result)
 
   const payment ={
     amount : 1000,
@@ -399,7 +419,6 @@ if(session?.payment_status === 'paid'){
     paymentStatus : session.payment_status,
     paidAt : new Date (),
   }
-  console.log("payment log----->", payment)
 
 
   if(session?.payment_status === 'paid'){
@@ -429,13 +448,11 @@ if(session?.payment_status === 'paid'){
     const query = await users.findOne({_id :new ObjectId(staffId) });
     const result =   await users.deleteOne(query)
     res.status(200).send({message: "Staff deleted"})
-    console.log(doc)
   })
 
     // Delete Data ends------------------
 
   } catch (error) {
-    console.error("MongoDB connection error:", error);
     process.exit(1); // stop server if DB connection fails
   }
 }
