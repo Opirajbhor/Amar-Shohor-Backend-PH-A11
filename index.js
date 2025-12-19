@@ -69,9 +69,18 @@ async function connectDB() {
         res.status(500).json({ mesage: "data load failled" });
       }
     });
+    // get latest issuess-------------
+    app.get('/latest-issues', async(req, res)=>{
+      try {
+        const result = await all_Issues.find().sort({ _id: -1 }).limit(6).toArray();
+        res.status(200).json(result);
+      } catch (err) {
+        res.status(500).json({ mesage: "data load failled" });
+      }
+    })
 
     // get user issue Data-------------
-    app.get("/user-issues", async (req, res) => {
+    app.get("/user-issues",verifyJWT, async (req, res) => {
       const userEmail = req.headers.email
       if (!userEmail) {
         return res.status(400).json({ message: "user is missing." });
@@ -96,7 +105,7 @@ async function connectDB() {
 
 
     // get user payments
-    app.get('/user-payments', async(req,res)=>{
+    app.get('/user-payments',verifyJWT, async(req,res)=>{
       const userEmail = req.headers.email
         if (!userEmail) {
         return res.status(400).json({ message: "user is missing." });
@@ -113,7 +122,7 @@ async function connectDB() {
 
     // Admin----------------
     // manage issues------------
-       app.get("/manage-issues", async (req, res) => {
+       app.get("/manage-issues",verifyJWT, async (req, res) => {
       try {
         const result = await all_Issues.find().toArray();
         res.status(200).json(result);
@@ -122,7 +131,7 @@ async function connectDB() {
       }
     });
     // manage users----------------
-       app.get("/manage-users", async (req, res) => {
+       app.get("/manage-users",verifyJWT, async (req, res) => {
       try {
         const result = await users.find({role:"Citizen"}).toArray();
         res.status(200).json(result);
@@ -131,7 +140,7 @@ async function connectDB() {
       }
     });
     // manage staff----------------
-       app.get("/manage-staff", async (req, res) => {
+       app.get("/manage-staff",verifyJWT, async (req, res) => {
       try {
         const result = await users.find({role:"Staff"}).toArray();
         res.status(200).json(result);
@@ -140,7 +149,7 @@ async function connectDB() {
       }
     });
     // staff list----------------
-       app.get("/staff-list", async (req, res) => {
+       app.get("/staff-list",verifyJWT, async (req, res) => {
       try {
         const result = await users.find({role: 'Staff'}).toArray();
         res.status(200).json(result);
@@ -149,7 +158,7 @@ async function connectDB() {
       }
     });
     // manage payments----------------
-       app.get("/manage-payments", async (req, res) => {
+       app.get("/manage-payments",verifyJWT, async (req, res) => {
       try {
         const result = await paymentCollection.find().toArray();
         res.status(200).json(result);
@@ -159,7 +168,7 @@ async function connectDB() {
     });
 
     // staff issues----------------
-    app.get("/assign-issues", async (req, res)=>{
+    app.get("/assign-issues",verifyJWT, async (req, res)=>{
           const {name} = req.query
            if (!name) {
              return res.status(400).json({ message: "user is missing." });
@@ -177,7 +186,7 @@ async function connectDB() {
     // ***********Post Data starts-------------------------------------
 
     // post an issue
-    app.post("/all-issues", async (req, res) => {
+    app.post("/all-issues",verifyJWT, async (req, res) => {
       const { title, description, email, location, category, image } = req.body;
 
       const userLimit = all_Issues.countDocuments({ reportedBy: email });
@@ -251,7 +260,7 @@ async function connectDB() {
     });
     // staff create-----------------
     // post user info from registration form method
-    app.post("/staff", async (req, res) => {
+    app.post("/staff",verifyJWT, async (req, res) => {
       try {
         const { name, imageURL, email,phone } = req.body;
         const isUserAvailable = await users.countDocuments({ email: email });
@@ -299,7 +308,7 @@ async function connectDB() {
       }
     });
 // payment api for boost issue------------
-app.post('/create-checkout-session', async (req, res) => {
+app.post('/create-checkout-session',verifyJWT, async (req, res) => {
     const paymentInfo =  req.body
     const session = await stripe.checkout.sessions.create({
          line_items: [
@@ -328,7 +337,7 @@ app.post('/create-checkout-session', async (req, res) => {
     // Post Data ends---------------------------------------
     
     // patch Data Starts-------------------------
-    app.patch("/all-issues/:id", async (req, res) => {
+    app.patch("/all-issues/:id",verifyJWT, async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -348,7 +357,7 @@ app.post('/create-checkout-session', async (req, res) => {
   }
 });
     // patch Data Starts-------------------------
-    app.patch("/manage-users/:id", async (req, res) => {
+    app.patch("/manage-users/:id",verifyJWT, async (req, res) => {
   try {
     const { id } = req.params;
     const blockState = req.body;
@@ -388,7 +397,7 @@ app.patch('/profile-update',verifyJWT, async(req, res)=>{
 
 
 // payment data update
-app.patch('/payment-success', async (req,res)=>{
+app.patch('/payment-success',verifyJWT, async (req,res)=>{
   const sessionId = req.query.session_id
   const session = await stripe.checkout.sessions.retrieve(sessionId)
  const transactionId = session.payment_intent
@@ -436,14 +445,14 @@ if(session?.payment_status === 'paid'){
     // patch Data ends-------------------------
 
     // Delete Data Starts------------------
-  app.delete('/all-issues/:id', async (req, res)=>{
+  app.delete('/all-issues/:id',verifyJWT, async (req, res)=>{
     const issueId = req.params.id
     const doc = await all_Issues.findOne();
     const query = {_id: new ObjectId(issueId)}
     const result =   await all_Issues.deleteOne(query)
     res.status(200).send({message: "Issue deleted"})
   })
-  app.delete('/staff-delete/:id', async (req, res)=>{
+  app.delete('/staff-delete/:id',verifyJWT, async (req, res)=>{
     const staffId = req.params.id
     const query = await users.findOne({_id :new ObjectId(staffId) });
     const result =   await users.deleteOne(query)
