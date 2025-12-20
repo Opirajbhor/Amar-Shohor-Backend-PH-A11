@@ -470,7 +470,7 @@ async function connectDB() {
 
     // Delete Data ends------------------
   } catch (error) {
-    process.exit(1); // stop server if DB connection fails
+    process.exit(1); 
   } finally {
     app.listen(port, () => {
       console.log(`Example app listening on port ${port}`);
@@ -480,5 +480,5 @@ async function connectDB() {
 connectDB().catch(console.dir);
 // Routes
 app.get("/", (req, res) => {
-  res.send("Backend is Running!");
+  res.send("Backend is Running PERFECTLY!");
 });
