@@ -464,16 +464,20 @@ if(session?.payment_status === 'paid'){
   } catch (error) {
     process.exit(1); // stop server if DB connection fails
   }
+  finally {
+    app.listen(port, () => {
+      console.log(`Example app listening on port ${port}`);
+    })}
 }
-
+connectDB().catch(console.dir);
 // Routes
 app.get("/", (req, res) => {
   res.send("Backend is Running!");
 });
 
 // Start server only after DB connects
-connectDB().then(() => {
-  app.listen(port, () => {
-    console.log("Server running on port", port);
-  });
-});
+// connectDB().then(() => {
+//   app.listen(port, () => {
+//     console.log("Server running on port", port);
+//   });
+// });
