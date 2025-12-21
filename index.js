@@ -105,6 +105,21 @@ async function connectDB() {
       }
     });
 
+    // get user data
+    app.get("/user-info", async (req, res) => {
+      const email = req.headers.email;
+      if (!email) {
+        return res.status(400).json({ message: "user is missing." });
+      }
+      try {
+        const query = { email: email };
+        const userInfo = await users.findOne(query);
+        res.status(200).json(userInfo);
+      } catch (err) {
+        res.status(500).send({ message: "Server Error", error: err.message });
+      }
+    });
+
     // get single issue data
     app.get("/all-issues/:id", async (req, res) => {
       const id = req.params.id;
@@ -215,7 +230,6 @@ async function connectDB() {
           reportedBy: email,
           status: "Pending",
           createdAt: new Date(),
-          upvoteCount: 0,
           assignedTo: "Not Assigned Yet",
           isBoosted: false,
         };
@@ -386,6 +400,36 @@ async function connectDB() {
       }
     });
 
+    // patch upvote
+    app.patch("/issues/upvote/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const userEmail = req.body.email;
+      if (!userEmail)
+        return res.status(400).send({ message: "User email required" });
+      try {
+        const filter = { _id: new ObjectId(id) };
+        const issue = await all_Issues.findOne(filter);
+        console.log(issue);
+        const votes = Array.isArray(issue?.upVotes) ? issue.upVotes : [];
+        console.log(votes);
+        if (votes?.includes(userEmail)) {
+          return res
+            .status(400)
+            .send({ message: "You have already upvoted this issue." });
+        }
+        const updateDoc = {
+          $push: { upVotes: userEmail },
+        };
+        console.log("updateDoc,", updateDoc);
+        const result = await all_Issues.updateOne(filter, updateDoc);
+        console.log("result", result);
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: "Server error", error });
+      }
+    });
+
     // update profile--------
     app.patch("/profile-update", verifyJWT, async (req, res) => {
       const { name, photoURL } = req.body;
@@ -470,7 +514,7 @@ async function connectDB() {
 
     // Delete Data ends------------------
   } catch (error) {
-    process.exit(1); 
+    process.exit(1);
   } finally {
     app.listen(port, () => {
       console.log(`Example app listening on port ${port}`);
