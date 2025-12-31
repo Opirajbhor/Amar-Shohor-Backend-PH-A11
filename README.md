@@ -1,7 +1,3 @@
-Below is a **fully copy-pasteable `README.md` file**.
-You can **select all → copy → paste directly into your GitHub README**.
-No extra explanation, just the README content.
-
 ---
 
 ````md
@@ -12,15 +8,6 @@ No extra explanation, just the README content.
 **Amar Shohor Backend** is a RESTful API built using **Node.js** and **Express.js**.  
 It provides backend services for the *Amar Shohor* project, handling data management, API routing, and database operations to support frontend applications such as city information or tourism platforms.
 
----
-
-## 📷 Screenshot
-
-> Add a clean screenshot of API responses (Postman / Browser)
-
-![API Screenshot](https://via.placeholder.com/900x450.png?text=Amar+Shohor+Backend+API)
-
----
 
 ## 🛠 Technologies Used
 
@@ -123,9 +110,6 @@ Test API endpoints using **Postman** or **Insomnia**.
 * **GitHub Repository:**
   [https://github.com/Opirajbhor/Amar-Shohor-Backend-PH-A11](https://github.com/Opirajbhor/Amar-Shohor-Backend-PH-A11)
 
-* **Live Backend URL:**
-  [https://amar-shohor-backend-ph-a11.vercel.app](https://amar-shohor-backend-ph-a11.vercel.app)
-
 ---
 
 ## ✍️ Author
@@ -138,14 +122,4 @@ Frontend Developer | JavaScript & React Enthusiast
 ⭐ If you find this project useful, consider giving it a star.
 
 ```
-
----
-
-If you want, I can:
-- Replace the placeholder screenshot with a **real Postman screenshot**
-- Add **API endpoint documentation**
-- Make it **Programming Hero–perfect**
-- Write a matching **Frontend README**
-
-Just say the word.
-```
+    
