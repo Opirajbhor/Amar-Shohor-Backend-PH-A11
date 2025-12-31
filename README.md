@@ -1,5 +1,3 @@
----
-
 ````md
 # Amar Shohor Backend (PH-A11)
 
@@ -8,6 +6,7 @@
 **Amar Shohor Backend** is a RESTful API built using **Node.js** and **Express.js**.  
 It provides backend services for the *Amar Shohor* project, handling data management, API routing, and database operations to support frontend applications such as city information or tourism platforms.
 
+---
 
 ## 🛠 Technologies Used
 
