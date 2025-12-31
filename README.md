@@ -1,0 +1,61 @@
+# Amar Shohor Backend (PH-A11)
+
+## 📌 Project Overview
+
+**Amar Shohor Backend** is a RESTful API built using **Node.js** and **Express.js**.  
+It provides backend services for the *Amar Shohor* project, handling data management, API routing, and database operations to support frontend applications such as city information or tourism platforms.
+
+---
+
+## 📷 Screenshot
+
+> Add a clean screenshot of API responses (Postman / Browser)
+
+![API Screenshot](https://via.placeholder.com/900x450.png?text=Amar+Shohor+Backend+API)
+
+---
+
+## 🛠 Technologies Used
+
+- Node.js
+- Express.js
+- MongoDB
+- JavaScript (ES6)
+- Vercel (Deployment)
+- dotenv
+
+---
+
+## ⭐ Core Features
+
+- RESTful API architecture
+- CRUD operations for managing data
+- MongoDB database integration
+- Environment variable configuration
+- Clean and scalable backend structure
+- Ready for frontend integration
+
+---
+
+## 📦 Dependencies
+
+Main dependencies used in this project:
+
+- **express** – Web framework for Node.js
+- **mongodb** – MongoDB native driver
+- **dotenv** – Environment variable management
+
+Optional / Development:
+- **nodemon** – Auto-restart server during development
+
+---
+
+## 🧪 How to Run Locally
+
+Follow these steps to run the project on your local machine:
+
+### 1️⃣ Clone the repository
+
+```bash
+git clone https://github.com/Opirajbhor/Amar-Shohor-Backend-PH-A11.git
+cd Amar-Shohor-Backend-PH-A11
